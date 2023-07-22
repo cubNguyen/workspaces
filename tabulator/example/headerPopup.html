@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" rel="stylesheet" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            var data = [
+                { col1: '123 1', col2: 'eryt 2', col3: '06/27' },
+                { col1: '456 1', col2: 'gfhj 2', col3: '3' },
+                { col1: '789 1', col2: 'cvbn 2', col3: '3' },
+            ];
+
+            var calcSum = function (values, data, calcParams) {
+                let sum = 0;
+                values.forEach(function (value) {
+                    if (value.indexOf('/') < 0) {
+                        sum += Number(value);
+                    }
+                });
+                return sum;
+            };
+
+            //create header popup contents
+            var headerPopupFormatter = function (e, column, onRendered) {
+                //e - the mouse/touch event that triggered the popup
+                //component - column/row/cell component that triggered this popup
+                //onRendered - function to call when the formatter has been rendered
+
+                // var container = document.createElement('div');
+
+                // var label = document.createElement('label');
+                // label.innerHTML = 'Filter Column:';
+                // label.style.display = 'block';
+                // label.style.fontSize = '.7em';
+
+                // var input = document.createElement('input');
+                // input.placeholder = 'Filter Column...';
+                // input.value = column.getHeaderFilterValue() || '';
+
+                // input.addEventListener('keyup', (e) => {
+                //     column.setHeaderFilterValue(input.value);
+                // });
+
+                // container.appendChild(label);
+                // container.appendChild(input);
+
+                // return container;
+
+                var div = document.createElement('div');
+                div.id = 'filterTable';
+
+                var filterData = [{ data: 'aSC 01' }, { data: 'aSC 02' }, { data: 'aSC 03' }, { data: 'aSC 04' }, { data: 'aSC 05' }];
+
+                var filterTable = new Tabulator(div, {
+                    headerSortClickElement: 'icon',
+                    columns: [
+                        { formatter: 'rowSelection', titleFormatter: 'rowSelection', align: 'center', headerSort: false },
+                        { title: 'Work Line', field: 'data', width: 200, headerFilter: 'input' },
+                    ],
+                    data: filterData,
+                    selectable: true,
+                });
+
+                return div;
+            };
+
+            //create dummy header filter to allow popup to filter
+            var emptyHeaderFilter = function () {
+                return document.createElement('div');
+            };
+
+            function customFilterLines(table, field) {
+                // var columnElement = table.getColumn(field).getElement();
+                // var columnFilter = table.getColumn('col3').getElement().getElementsByClassName('tabulator-header-filter');
+                var tagInput = table.getColumn(field).getElement().getElementsByTagName('input')[0];
+                tagInput.setAttribute('list', 'lines');
+                tagInput.addEventListener("click", table.getColumn(field).popup(headerPopupFormatter));
+                // return true;
+            }
+
+            var table = new Tabulator('#example-table', {
+                columns: [
+                    { title: 'CHK', formatter: 'rowSelection', titleFormatter: 'rowSelection', headerSort: false },
+                    {
+                        title: 'cant edit',
+                        field: 'col1',
+                        width: 200,
+                        headerPopup: headerPopupFormatter,
+                        headerPopupIcon: "<i class='fas fa-filter' title='Filter column'></i>",
+                        headerFilter: 'list',
+                        headerFilterFunc: 'like',
+                    },
+                    {
+                        title: 'can edit',
+                        field: 'col2',
+                        width: 200,
+                        editor: 'input',
+                        headerPopup: headerPopupFormatter,
+                        headerPopupIcon: "<i class='fas fa-filter' title='Filter column'></i>",
+                        headerFilter: 'input',
+                        headerFilterFunc: 'like',
+                    },
+                    {
+                        title: 'double click',
+                        field: 'col3',
+                        width: 200,
+                        headerClickPopup: headerPopupFormatter,
+                        // headerPopupIcon: "<i class='fas fa-filter' title='Filter column'></i>",
+                        headerFilter: 'input',
+                        headerFilterFunc: 'like',
+                        // topCalc: eval("calcSum"),
+                    },
+                ],
+                headerSortClickElement: 'icon',
+                data: data,
+                selectable: true,
+                //
+                debugEventsExternal: true, //console log external events
+                debugEventsInternal: true, //console log internal events
+            });
+
+            table.on('tableBuilt', function () {
+                customFilterLines(table, 'col3');
+            });
+
+            $(document).ready(function () {
+                table.on('dataFiltering', function (filters) {
+                    console.log('dataFiltering');
+                });
+
+                table.on('cellClick', function (e, cell) {
+                    if (cell.getColumn().getDefinition().title != 'CHK') {
+                        cell.getRow().toggleSelect();
+                    }
+
+                    cell.getColumn().popup(headerPopupFormatter);
+                    // $(cell.getColumn().getElement()).click();
+                    // $(cell.getColumn().getElement()).trigger('popupOpened');
+                });
+
+                // table.on('cellEdited', function (cell) {
+                //     if (cell.isEdited()) {
+                //         cell.getRow().select();
+                //     }
+                // });
+
+                //
+                table.on('headerClick', function (e, column) {
+                    // e.stopPropagation();
+                    // e.preventDefault();
+                    // e.stopImmediatePropagation();
+                    // if (e.target.className.toLowerCase() != 'tabulator-arrow') {
+                    //     console.log(e.target.className.toLowerCase());
+                    //     e.stopImmediatePropagation();
+                    //     return false;
+                    // }
+                    console.log('headerClick');
+                });
+
+                table.on('dataSorting', function (sorters) {
+                    //sorters - an array of the sorters currently applied
+                    console.log(sorters);
+                    // e.stopPropagation();
+                    // e.preventDefault();
+                    // e.stopImmediatePropagation();
+                });
+
+                table.updateColumnDefinition('col3', { topCalc: calcSum });
+
+                // table.updateColumnDefinition('col3', { cellEdited: calcSum });
+
+                // table.on('headerDblClick', function (e, col) {
+                //     e.stopPropagation();
+                //     e.preventDefault();
+                //     e.stopImmediatePropagation();
+
+                //     if (e.target.tagName.toLowerCase() == 'input') {
+                //         e.stopImmediatePropagation();
+                //         return false;
+                //     }
+
+                //     let isFilterShow = false;
+
+                //     if (col.getDefinition().title != 'CHK') {
+                //         if (col.getDefinition().headerFilter == undefined || col.getDefinition().headerFilter == false) {
+                //             isFilterShow = true;
+                //         }
+                //     }
+
+                //     let newColumns = [];
+                //     // var curColumns = table.getColumns();
+                //     table.getColumns().forEach((col) => {
+                //         if (col.getDefinition().title != 'CHK') {
+                //             col._column.definition.headerFilter = isFilterShow;
+                //         }
+                //         newColumns.push(col.getDefinition());
+                //     });
+                //     table.setColumns(newColumns);
+
+                //     table.clearHeaderFilter();
+                // });
+            });
+        </script>
+    </body>
+</html>

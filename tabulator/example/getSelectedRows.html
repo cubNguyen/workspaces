@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://unpkg.com/tabulator-tables@5.5/dist/css/tabulator.min.css" rel="stylesheet" />
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.3/dist/js/tabulator.min.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <!-- <p>Double-click on Header to show filter</p> -->
+        <!-- <br /> -->
+        <div id="example-table"></div>
+
+        <br />
+        <input type="button" id="btnSubmit" value="SUBMIT >> getSelectedData()" />
+        <div id="submited"></div>
+
+        <script>
+            var data = [
+                { col1: 'data 1', col2: 'data 2', col3: '06/27' },
+                { col1: 'data 1', col2: 'data 2', col3: '0.3' },
+                { col1: 'data 1', col2: 'data 2', col3: '0010' },
+                { col1: 'data 1', col2: 'data 2', col3: '0200' },
+                { col1: 'data 1', col2: 'data 2', col3: '3000' },
+                { col1: 'data 1', col2: 'data 2', col3: '0.02' },
+            ];
+
+            var table = new Tabulator('#example-table', {
+                columns: [
+                    { title: 'CHK', formatter: 'rowSelection', titleFormatter: 'rowSelection', align: 'center', headerSort: false },
+                    { title: 'cant edit', field: 'col1', width: 200 },
+                    { title: 'can edit', field: 'col2', width: 200, editor: 'input' },
+                    {
+                        title: 'cant edit',
+                        field: 'col3',
+                        width: 200,
+                    },
+                ],
+                data: data,
+                selectable: true,
+            });
+
+            var calcSum = function (values, data, calcParams) {
+                let sum = 0;
+                values.forEach(function (value) {
+                    if (value.indexOf('/') < 0) {
+                        sum += Number(value);
+                    }
+                });
+                return new Intl.NumberFormat().format(sum);
+            };
+
+            $(document).ready(function () {
+                jQuery(document).on('click', '#btnSubmit', function () {
+                    html = '';
+                    // let selectedRows = table.getSelectedRows();
+                    table.getSelectedData().forEach((row) => {
+                        html += '<p>' + JSON.stringify(row) + '</p>';
+                    });
+                    jQuery('#submited').html(html);
+                });
+
+                // e - the click event object
+                // cell - cell component
+                table.on('cellClick', function (e, cell) {
+                    if (cell.getColumn().getDefinition().title != 'CHK') {
+                        cell.getRow().toggleSelect();
+                    }
+                });
+
+                // cell - cell component
+                table.on('cellEdited', function (cell) {
+                    if (cell.isEdited()) {
+                        cell.getRow().select();
+                    }
+                });
+
+                table.updateColumnDefinition('col3', { topCalc: calcSum });
+            });
+        </script>
+    </body>
+</html>

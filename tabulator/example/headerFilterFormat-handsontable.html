@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" rel="stylesheet" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+        <style>
+            .tabulator-header-popup-button {
+                padding: 2px 5px 2px 6px;
+            }
+
+            .tabulator-header-popup-button.active {
+                color: rgba(251, 214, 105);
+                text-shadow: 1px 1px 3px #000;
+            }
+
+            .menu-overlay {
+                position: absolute;
+                z-index: 1;
+                display: none;
+            }
+
+            .close-menu-button {
+                position: relative;
+                float: right;
+                border-radius: 5px;
+            }
+            .close-menu-button:hover {
+                background-color: #ddd;
+            }
+
+            .filter-menu {
+                position: absolute;
+                bottom: 0px;
+                background-color: #f8f8f8;
+                padding: 5px;
+                max-height: 355px;
+                min-width: 150px;
+                border: 1px solid #999;
+            }
+
+            .filter-menu > button {
+                border-radius: 4px;
+                border-width: 1px;
+            }
+
+            #clear-selection-button {
+                position: relative;
+                background: none;
+                border: none;
+                color: red;
+                cursor: pointer;
+                font-size: 15px;
+                top: 3px;
+            }
+
+            #select-all-button {
+                position: relative;
+                background: none;
+                border: none;
+                color: blue;
+                cursor: pointer;
+                font-size: 15px;
+                top: 3px;
+            }
+
+            #value-select {
+                position: relative;
+                height: 250px;
+                width: 200px;
+                margin: 5px;
+                overflow: auto;
+                background-color: #ffffff;
+            }
+
+            #value-select > label {
+                display: flex;
+            }
+
+            #remove-filter-button {
+                background: none;
+                border: none;
+                font-size: 15px;
+                color: red;
+                cursor: pointer;
+            }
+
+            #filter-button {
+                float: right;
+                position: relative;
+                background-color: #f8f8f8;
+                border-radius: 5px;
+            }
+            #filter-button:hover {
+                background-color: #ddd;
+            }
+        </style>
+    </head>
+    <body>
+        https://github.com/olifolkerd/tabulator/issues/4225
+
+        <div id="example-table"></div>
+
+        <div class="menu-overlay">
+            <div class="filter-menu">
+                <button class="close-menu-button">x</button>
+                <input type="text" id="filter-input" placeholder="Cerca..." />
+                <button id="clear-selection-button"></button>
+                <button id="select-all-button"></button>
+                <div id="value-select"></div>
+                <button id="remove-filter-button"></button>
+                <button id="filter-button">OK</button>
+            </div>
+        </div>
+
+        <script>
+            //
+            var data = [
+                { id: 1, name: 'Oli Bob', location: 'United Kingdom', gender: 'male', rating: 1, col: 'red' },
+                { id: 2, name: 'Mary May', location: 'Germany', gender: 'female', rating: 2, col: 'blue' },
+                { id: 3, name: 'Christine Lobowski', location: 'France', gender: 'female', rating: 0, col: 'green' },
+                { id: 4, name: 'Brendon Philips', location: 'USA', gender: 'male', rating: 1, col: 'orange' },
+                { id: 5, name: 'Margret Marmajuke', location: 'Canada', gender: 'female', rating: 5, col: 'yellow' },
+                { id: 6, name: 'Frank Harbours', location: 'Russia', gender: 'male', rating: 4, col: 'red' },
+                { id: 7, name: 'Jamie Newhart', location: 'India', gender: 'male', rating: 3, col: 'green' },
+                { id: 8, name: 'Gemma Jane', location: 'China', gender: 'female', rating: 0, col: 'red' },
+                { id: 9, name: 'Emily Sykes', location: 'South Korea', gender: 'female', rating: 1, col: 'maroon' },
+                { id: 10, name: 'James Newman', location: 'Japan', gender: 'male', rating: 5, col: 'red' },
+            ];
+
+            var table = new Tabulator('#example-table', {
+                headerMenu:true, //show advanced filter menu (Set in column properties)
+                // headerSortClickElement: 'icon',
+                autoColumns: true,
+                data: data,
+            });
+
+            // Add filter icon
+            $('.tabulator-header-popup-button').html('<i class="fas fa-filter"></i>');
+
+            var menuOverlay = $('.menu-overlay');
+
+            // Clear data on change
+            var clickedColumn = null;
+            var filters = []; // Array per memorizzare i filtri per ogni colonna
+
+            // Declaration of the global variable for the separate data of the columns for filter button activation
+            var distinctColumnData = {};
+
+            // Adding the click event to the "Advanced Filter" button
+            $('.tabulator-header-popup-button').on('click', function (e) {
+                // Show the menu overlay
+                menuOverlay.show();
+
+                var posX = e.pageX;
+                var posY = e.pageY;
+
+                menuOverlay.css({
+                    top: posY + 'px',
+                    left: posX + 'px',
+                    display: 'block',
+                });
+
+                // Get the clicked column
+                var columnElement = $(e.target).closest('.tabulator-col').get(0);
+                clickedColumn = table.getColumn(columnElement).getField();
+
+                // Removing the previous options from the list of values
+                $('#value-select').empty();
+
+                // Get the visible data in the selected column
+                var columnData = [];
+                var visibleRows = table.getRows('active'); // Get only the current rows
+
+                // Iteration over the visible lines
+                visibleRows.forEach(function (row) {
+                    var cellValue = row.getCell(clickedColumn).getValue(); // Get the cell value for the visible row
+
+                    // Adding the value to the list of distinct values
+                    if (cellValue && columnData.indexOf(cellValue) === -1) {
+                        columnData.push(cellValue);
+
+                        // Create a checkbox for each value
+                        var checkbox = $('<label><input type="checkbox" value="' + cellValue + '">' + cellValue + '<br>' + '</label>');
+                        $('#value-select').append(checkbox);
+                    }
+                });
+
+                // Updating the distinctColumnData variable with the distinct column data
+                distinctColumnData[clickedColumn] = columnData;
+
+                // Select all checkboxes in the #value-select list
+                $('#value-select input[type="checkbox"]').prop('checked', true);
+            });
+
+            // Adding the click event to the "Close menu" button
+            $('.close-menu-button').on('click', function () {
+                hideMenuOverlay();
+            });
+
+            // Hide or show the checkboxes based on the value entered in the input-box
+            function filterListValues() {
+                $(function () {
+                    $('#filter-input').on('keyup', function () {
+                        var query = this.value.toLowerCase();
+                        $('#value-select input[type="checkbox"]').each(function (i, elem) {
+                            if (elem.value.toLowerCase().indexOf(query) != -1) {
+                                $(this).closest('label').show();
+                            } else {
+                                $(this).closest('label').hide();
+                            }
+                        });
+                    });
+                });
+            }
+            filterListValues();
+
+            // Added icon to "Select All" button
+            $('#select-all-button').html(
+                '<i class="far fa-square" style="position: relative; top: -2px; left: -1px;"></i><i class="fas fa-square fa-inverse" style="position: absolute; top: 3px; left: 9px;"></i><i class="far fa-square-check" style="position: absolute; top: 3px; left: 8px;"></i>'
+            );
+            // Adding the click event to the "Select All" button
+            $('#select-all-button').on('click', function () {
+                // Select only value-select checkboxes that don't have a label with display: none
+                $('#value-select label:not([style*="display: none"]) input[type="checkbox"]').prop('checked', true);
+            });
+
+            // Added icon to "Clear Selection" button
+            $('#clear-selection-button').html(
+                '<i class="far fa-square" style="position: relative; top: -2px; left: -1px;"></i><i class="fas fa-square fa-inverse" style="position: absolute; top: 3px; left: 9px;"></i><i class="far fa-square-xmark" style="position: absolute; top: 3px; left: 8px;"></i>'
+            );
+            // Adding the click event to the "Clear Selection" button
+            $('#clear-selection-button').on('click', function () {
+                // Remove the filter for the current column
+                var columnFilter = filters.find(function (filter) {
+                    return filter.field === clickedColumn;
+                });
+
+                if (columnFilter) {
+                    var filterIndex = filters.indexOf(columnFilter);
+                    if (filterIndex !== -1) {
+                        filters.splice(filterIndex, 1);
+                    }
+                }
+                // Remove the selection from all value-select checkboxes
+                $('#value-select input[type="checkbox"]').prop('checked', false);
+            });
+
+            // Update values ​​in list, keep filter in columns already filtered
+            $(document).on('change', '#value-select input[type="checkbox"]', function () {
+                var value = $(this).val();
+                var columnFilter = filters.find(function (filter) {
+                    return filter.field === clickedColumn;
+                });
+
+                if (columnFilter) {
+                    if (!columnFilter.values) {
+                        columnFilter.values = [];
+                    }
+
+                    if ($(this).is(':checked')) {
+                        columnFilter.values.push(value);
+                    } else {
+                        var index = columnFilter.values.indexOf(value);
+                        if (index !== -1) {
+                            columnFilter.values.splice(index, 1);
+                        }
+                    }
+                } else {
+                    columnFilter = {
+                        field: clickedColumn,
+                        values: [],
+                    };
+
+                    if ($(this).is(':checked')) {
+                        columnFilter.values.push(value);
+                        filters.push(columnFilter);
+                    }
+                }
+            });
+
+            // Added icon to "Remove Filter" button
+            $('#remove-filter-button').html('<i class="fas fa-filter-circle-xmark"></i>');
+            // Adding the click event to the "Remove Filter" button
+            $(document).on('click', '#remove-filter-button', function () {
+                // Remove the filter for the current column
+                $('#clear-selection-button').click();
+
+                // Click the "Filter" button to apply the remaining filters
+                $('#filter-button').click();
+            });
+
+            // Adding the click event to the "Filter" button
+            $(document).on('click', '#filter-button', function () {
+                // Close the menu
+                hideMenuOverlay();
+
+                // Get the current distinct data of the column
+                var currentColumnData = distinctColumnData[clickedColumn];
+
+                // Get the values ​​of the selected checkboxes that don't have a label with display: none
+                var selectedValues = $('#value-select label')
+                    .filter(function () {
+                        return $(this).css('display') !== 'none';
+                    })
+                    .find('input[type="checkbox"]:checked')
+                    .map(function () {
+                        return $(this).val();
+                    })
+                    .get();
+
+                // Comparison between the current distinct data and the selected values
+                var isDistinctDataDifferent = JSON.stringify(currentColumnData) !== JSON.stringify(selectedValues);
+
+                // Adding/Removing the "active" class to the filtered column button
+                setTimeout(function () {
+                    var targetButton = $('.tabulator-col[tabulator-field="' + clickedColumn + '"] .tabulator-header-popup-button');
+
+                    if (isDistinctDataDifferent && selectedValues.length > 0) {
+                        targetButton.addClass('active');
+                    } else {
+                        targetButton.removeClass('active');
+                    }
+                }, 0);
+
+                // Create the filter array for Tabulator
+                var tabulatorFilters = filters.map(function (filter) {
+                    return {
+                        field: filter.field,
+                        type: 'in',
+                        value: filter.values,
+                    };
+                });
+
+                // Add the values ​​of the selected checkboxes to the filters
+                if (selectedValues.length > 0) {
+                    tabulatorFilters.push({
+                        field: clickedColumn,
+                        type: 'in',
+                        value: selectedValues,
+                    });
+                }
+
+                // Apply filters
+                table.setFilter(tabulatorFilters);
+            });
+
+            // Close the menu when clicked out of it
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.filter-menu').length && !$(e.target).is('#advanced-filter')) {
+                    hideMenuOverlay();
+                }
+            });
+
+            // Function to hide the filter menu and empty the inputbox
+            function hideMenuOverlay() {
+                menuOverlay.hide();
+                $('#filter-input').val('');
+            }
+        </script>
+    </body>
+</html>

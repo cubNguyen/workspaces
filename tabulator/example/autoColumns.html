@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.min.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            var data = [
+            {"01.0":"0","01.5":"0","02.0":"0","02.5":"0","03.0":"0","03.5":"0","04.0":"4","04.5":"4","05.0":"5","05.5":"6","06.0":"12","06.5":"20","07.0":"21","07.5":"36","08.0":"42","08.5":"27","09.0":"28","09.5":"18","10.0":"13","10.5":"8","11.0":"5","11.5":"0","12.0":"3","12.5":"0","13.0":"0","13.5":"0","14.0":"0","14.5":"0","15.0":"0","15.5":"0","16.0":"0","16.5":"0","17.0":"0","17.5":"0","18.0":"0","18.5":"0","19.0":"0","19.5":"0","20.0":"0","20.5":"0","21.0":"0"}
+            ];
+
+            var table = new Tabulator('#example-table', {
+                // layoutColumnsOnNewData: true,
+                headerSortClickElement: 'icon',
+                autoColumns:true,
+                data: data,
+            });
+        </script>
+    </body>
+</html>

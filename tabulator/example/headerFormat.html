@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+        <!-- <script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> -->
+
+        <!--  -->
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+        <!-- <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/jquery_wrapper.js"></script> -->
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script> -->
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            // var div = document.createElement('div');
+            // div.id = 'filterTable';
+            // $('body').append(div);
+
+            var filterTableInit = new Tabulator(document.createElement('div'), {
+                selectable: true,
+                height: 200,
+                layout: 'fitDataTable',
+                columns: [
+                    { formatter: 'rowSelection', titleFormatter: 'rowSelection', hozAlign: 'center', headerSort: false },
+                    { title: 'All', field: 'data', width: 100, headerFilter: 'input', headerSort: false },
+                ],
+            });
+        </script>
+
+        <script>
+            //
+            var data = [
+                { id: 1, name: 'Oli Bob', location: 'United Kingdom', gender: 'male', rating: 1, color: 'red' },
+                { id: 2, name: 'Mary May', location: 'Germany', gender: 'female', rating: 2, color: 'blue' },
+                { id: 3, name: 'Christine Lobowski', location: 'France', gender: 'female', rating: 0, color: 'green' },
+                { id: 4, name: 'Brendon Philips', location: 'USA', gender: 'male', rating: 1, color: 'orange' },
+                { id: 5, name: 'Margret Marmajuke', location: 'Canada', gender: 'female', rating: 5, color: 'yellow' },
+                { id: 6, name: 'Frank Harbours', location: 'Russia', gender: 'male', rating: 4, color: 'red' },
+                { id: 7, name: 'Jamie Newhart', location: 'India', gender: 'male', rating: 3, color: 'green' },
+                { id: 8, name: 'Gemma Jane', location: 'China', gender: 'female', rating: 0, color: 'red' },
+                { id: 9, name: 'Emily Sykes', location: 'South Korea', gender: 'female', rating: 1, color: 'maroon' },
+            ];
+
+            //create header popup contents
+            function headerPopupFormatter(e, column, onRendered) {
+                //e - the mouse/touch event that triggered the popup
+                //component - column/row/cell component that triggered this popup
+                //onRendered - function to call when the formatter has been rendered
+                // ------------------------------------------------------
+
+                onRendered(function () {
+                    this.element.style.display = 'none';
+                    //
+                    if (e.target.classList.contains('tabulator-header-filter-custom')) {
+                        // TODO: add event to 'X' icon
+                        if ($(e.target).is('i')) {
+                            if (e.target.classList.contains('fa-x')) {
+                                // alert('$(e.target).is(i)');
+                                // $(e.target).prev()
+                                column.getTable().setHeaderFilterValue(column.getField(), ''); // in vs list
+
+                                // chagne to lookup icon
+                                e.target.className = 'tabulator-header-filter-custom fa-solid fa-magnifying-glass'; // ver.6.4.0
+
+                                // set tag input's value to null
+                                // $(e.target).prev().val('')
+                                e.target.previousElementSibling.value = '';
+                            } else {
+                                // if (e.target.classList.contains('fa-magnifying-glass')) {
+                                this.element.style.display = 'inline-block';
+                            }
+                        } else {
+                            // if ($(e.target).is('input')) {
+                            this.element.style.display = 'inline-block';
+                        }
+                    }
+                });
+
+                // Get unique data in current column
+                let myArray = new Array();
+                // column.getCells().forEach((cell) => {
+                //     myArray.push(cell.getValue());
+                // });
+                column
+                    .getTable()
+                    .getData('active')
+                    .forEach((cell) => {
+                        myArray.push(cell[column.getField()]);
+                    });
+                let unique = myArray.filter((value, index, array) => array.indexOf(value) === index);
+
+                // Convert and set data for filterTable
+                let filterData = new Array();
+                unique.forEach((val) => {
+                    filterData.push({ id: val, data: val });
+                });
+
+                // let filterTable = Tabulator.findTable('#filterTable') ? Tabulator.findTable("#filterTable")[0] : filterTableInit;
+                let filterTable = filterTableInit;
+                // run code after table has been successfully updated
+                filterTable.setData(filterData).then(function () {
+                    // Get current filter value and set to filterTable
+                    let curVal = column.getHeaderFilterValue();
+                    if (curVal !== undefined && curVal !== '') {
+                        // filterTable.selectRow(curVal.split(','));    // like vs input
+                        filterTable.selectRow(curVal); // in vs list
+                    }
+                    filterTable.clearFilter();
+                });
+
+                return filterTable.element;
+            }
+
+            // https://tabulator.info/examples/5.5#filter-header
+            function customHeaderFilter(cell, onRendered, success, cancel, editorParams) {
+                return document.createElement('div');
+            }
+
+            // https://tabulator.info/docs/5.5/format#format-custom
+            function customHeaderTitle(cell, formatterParams, onRendered) {
+                //cell - the cell component
+                //formatterParams - parameters set for the column
+                //onRendered - function to call when the formatter has been rendered
+
+                onRendered(function () {
+                    let tagDivTitle = document.createElement('div');
+                    // tagDiv.className = 'tabulator-col-title tabulator-header-filter';
+                    tagDivTitle.className = 'tabulator-col-title';
+                    tagDivTitle.style = 'margin-top: 2px; padding-right: 0;';
+                    //
+                    let tagDivTitleCustom = document.createElement('div');
+                    // tagDiv.className = 'tabulator-col-title tabulator-header-filter';
+                    tagDivTitleCustom.className = 'tabulator-header-filter-custom';
+                    // <input type="search" placeholder="" style="padding: 4px; width: 100%; box-sizing: border-box;">
+                    let tagInput = document.createElement('input');
+                    tagInput.type = 'text';
+                    tagInput.style = 'padding: 4px; width: 100%; box-sizing: border-box; cursor: pointer;';
+                    tagInput.readOnly = true;
+                    tagInput.className = 'tabulator-header-filter-custom';
+                    //
+                    tagDivTitleCustom.appendChild(tagInput);
+
+                    //
+                    let tagIcon = document.createElement('i');
+                    // tagIcon.className = 'fa fa-search';
+                    tagIcon.className = 'tabulator-header-filter-custom fa-solid fa-magnifying-glass'; // ver.6.4.0
+                    tagIcon.style = 'position: relative; vertical-align: middle; right: 20px; cursor: pointer;';
+                    tagDivTitleCustom.appendChild(tagIcon);
+                    // return tagDiv;
+
+                    //
+                    tagDivTitle.appendChild(tagDivTitleCustom);
+                    cell.getElement().parentElement.parentElement.appendChild(tagDivTitle);
+                });
+
+                return cell.getValue();
+            }
+
+            $(document).ready(function () {
+                var table = new Tabulator('#example-table', {
+                    //
+                    headerSortClickElement: 'icon',
+                    data: data,
+                    height: '500px',
+                    // selectable: true,
+                    columns: [
+                        { title: 'CHK', formatter: 'rowSelection', titleFormatter: 'rowSelection', hozAlign: 'center', headerSort: false },
+                        { title: 'filter: input', field: 'name', width: 150, headerFilter: 'input' },
+                        { title: 'filter: number', field: 'rating', editor: 'star', hozAlign: 'center', headerFilter: 'number', headerFilterPlaceholder: 'at least...', headerFilterFunc: '>=' },
+                        // {
+                        //     title: 'Progress',
+                        //     field: 'progress',
+                        //     width: 150,
+                        //     formatter: 'progress',
+                        //     sorter: 'number',
+                        //     // headerFilter: minMaxFilterEditor,
+                        //     // headerFilterFunc: minMaxFilterFunction,
+                        //     // headerFilterLiveFilter: false,
+                        // },
+                        {
+                            title: 'headerClickPopup & filter: list',
+                            field: 'gender',
+                            editor: 'list',
+                            editorParams: { values: { male: 'Male', female: 'Female', clearable: true } },
+                            headerHozAlign: 'center',
+                            titleFormatter: customHeaderTitle,
+                            // headerFilter: 'input',
+                            // headerFilter: 'list',
+                            headerFilter: customHeaderFilter,
+                            headerFilterParams: {
+                                valuesLookup: true,
+                                clearable: true,
+                                multiselect: true,
+                                // freetext:true,
+                                // autocomplete:true,
+                                // itemFormatter: custItemFormatter,
+                            },
+                            // headerFilterParams: { values: { '': 'All', male: 'Male', female: 'Female' }, clearable: true },
+                            headerFilterFunc: 'in',
+                            headerClickPopup: headerPopupFormatter,
+                            // headerPopup: headerPopupFormatter,
+                            // clickPopup: headerPopupFormatter,
+                            // clickPopup: 'Hey, Im a Popup!',
+                        },
+                        {
+                            title: 'filter: list custom',
+                            field: 'color',
+                            editor: 'input',
+                            // hozAlign: 'center',
+                            headerSort: false,
+                            headerHozAlign: 'center',
+                            titleFormatter: customHeaderTitle,
+                            // headerFilter: 'input',
+                            // headerFilter: 'list',
+                            headerFilter: customHeaderFilter,
+                            // headerFilter: customHeaderFilter,
+                            headerFilterParams: {
+                                valuesLookup: true,
+                                clearable: true,
+                                multiselect: true,
+                                // freetext:true,
+                                // autocomplete:true,
+                                // itemFormatter: custItemFormatter,
+                            },
+                            headerFilterFunc: 'in',
+                            // headerPopup: headerPopupFormatter,
+                            headerClickPopup: headerPopupFormatter,
+                            // clickPopup: headerPopupFormatter,
+                            // headerClick: function (e, column) {
+                            //     var allNotSelected = userGrid.getSelectedRows().length !== userGrid.getDataCount();
+                            //     if (allNotSelected) {
+                            //         userGrid.selectRow();
+                            //     } else {
+                            //         userGrid.deselectRow();
+                            //     }
+                            //     userGrid.getRows().forEach((row) => row.update({ IsSelected: allNotSelected }));
+                            // },
+                        },
+                        // { title: 'Date Of Birth', field: 'dob', hozAlign: 'center', sorter: 'date', headerFilter: 'input' },
+                        // {
+                        //     title: 'Driver',
+                        //     field: 'car',
+                        //     hozAlign: 'center',
+                        //     formatter: 'tickCross',
+                        //     headerFilter: 'tickCross',
+                        //     headerFilterParams: { tristate: true },
+                        //     headerFilterEmptyCheck: function (value) {
+                        //         return value === null;
+                        //     },
+                        //     // clickPopup: headerPopupFormatter,
+                        // },
+                    ],
+                });
+
+                table.on('popupClosed', function (component) {
+                    //component - the component the popup has been closed for (could be cell, row or column depending on popup)
+
+                    // let filterTable = Tabulator.findTable('#filterTable') ? Tabulator.findTable('#filterTable')[0] : filterTableInit;
+                    let filterTable = filterTableInit;
+                    let filterVal = filterTable.getSelectedData().map(function (item) {
+                        return item['data'];
+                    });
+
+                    //
+                    // let tagInput = component.getElement().querySelector('.tabulator-header-filter-custom input[type="search"]');
+                    let tagInput = component.getElement().querySelector('.tabulator-header-filter-custom input[type="text"]');
+
+                    // when select all, act as clear
+                    if (filterTable.getDataCount() == filterTable.getSelectedData().length) {
+                        filterVal = [];
+                    }
+                    tagInput.value = filterVal.join();
+
+                    // change icon to 'X' when input have value
+                    let tagIcon = tagInput.nextElementSibling;
+                    if (tagInput.value != '') {
+                        tagIcon.className = 'tabulator-header-filter-custom fa-solid fa-x';
+                    } else {
+                        tagIcon.className = 'tabulator-header-filter-custom fa-solid fa-magnifying-glass';
+                    }
+
+                    // table.setHeaderFilterValue(component.getField(), filterVal.join());    // like vs input
+                    table.setHeaderFilterValue(component.getField(), filterVal); // in vs list
+                });
+
+                // table.on('tableBuilt', function () {
+                //     $('#example-table .tabulator-header-filter input').on('click', (e) => {
+                //         // e.stopPropagation();
+                //         let colField = $(e.target).parents('div.tabulator-col.tabulator-sortable').attr('tabulator-field');
+                //         $('#example-table div[tabulator-field="' + colField + '"] .tabulator-col-title-holder').trigger('click');
+                //         // return;
+                //         // $('#filterTable').
+                //     });
+                // });
+            });
+        </script>
+    </body>
+</html>

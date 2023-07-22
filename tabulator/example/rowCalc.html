@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet" />
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            var data = [
+                { col1: '06/27', col2: '2', col3: '3', col4: null },
+                { col1: '07/27', col2: '1', col3: '4', col4: null },
+                { col1: '08/27', col2: '0', col3: '6', col4: null },
+                { col1: '09/27', col2: '3', col3: '5', col4: null },
+            ];
+
+            var rowTotal = function(value, data, type, params, component){
+                return Number(data.col2) + Number(data.col3);
+            }
+
+            var table = new Tabulator('#example-table', {
+                columns: [
+                    { title: 'CHK', formatter: 'rowSelection', titleFormatter: 'rowSelection', headerSort: false },
+                    {
+                        title: 'col1',
+                        field: 'col1',
+                        width: 200,
+                    },
+                    {
+                        title: 'col2',
+                        field: 'col2',
+                        width: 200,
+                        // editor: 'input',
+                    },
+                    {
+                        title: 'col3',
+                        field: 'col3',
+                        width: 200,
+                    },
+                    {
+                        title: 'total',
+                        field: 'col4',
+                        width: 200,
+                        // mutator : function(value, row) {
+                        //     return row.col2 + row.col3;
+                        // }
+                    }
+                ],
+                // data: data,
+                selectable: 1,
+            });
+
+            $(document).ready(function () {
+                // 
+                table.updateColumnDefinition('col4', { mutator: rowTotal });
+                table.setData(data);
+
+                table.on('cellClick', function (e, cell) {
+                    if (cell.getColumn().getDefinition().field == 'col1') {
+                        // table.updateColumnDefinition("col"+1, {title: cell.getValue()})
+                        table.updateColumnDefinition("col"+2, {title: cell.getValue()})
+                        table.updateColumnDefinition("col"+3, {title: cell.getValue()})
+                        // table.updateColumnDefinition("col"+4, {title: cell.getValue()})
+                    }
+                });
+
+                table.on('cellEdited', function (cell) {
+                    cell.getRow().select();
+
+                    // if (cell.isEdited()) {
+                    //     cell.getRow().select();
+                    // }
+                });
+
+            });
+        </script>
+    </body>
+</html>

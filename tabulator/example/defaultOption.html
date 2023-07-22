@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.min.js"></script>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet" />
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            // 
+            var cusTitleFormatter = function(cell, formatterParams, onRendered){
+                //cell - the cell component
+                //formatterParams - parameters set for the column
+                //onRendered - function to call when the formatter has been rendered
+                
+                return "Mr" + cell.getValue(); //return the contents of the cell;
+            };
+
+
+            Tabulator.defaultOptions.layout = "fitData";
+            Tabulator.defaultOptions.height = "auto";
+            // Tabulator.defaultOptions.headerSort = false;
+            // Tabulator.defaultOptions.headerSortClickElement = "icon";
+            Tabulator.defaultOptions.placeholder = "No Data Available";
+            // 
+            Tabulator.defaultOptions.selectable = 1;
+            // 
+            Tabulator.defaultOptions.pagination = "local";
+            Tabulator.defaultOptions.paginationSize = 35;
+            Tabulator.defaultOptions.paginationCounter = "rows";
+            // 
+            Tabulator.defaultOptions.columnDefaults = {
+                headerSort:false,
+                titleFormatter: cusTitleFormatter,
+            }
+
+        </script>
+        
+        <script>
+            var data = [
+                { col1: '123 1', col2: 'eryt 2', col3: '06/27' },
+                { col1: '456 1', col2: 'gfhj 2', col3: '3' },
+                { col1: '789 1', col2: 'cvbn 2', col3: '3' },
+            ];
+
+            var table = new Tabulator('#example-table', {
+                columns: [
+                    { title: 'CHK', formatter: 'rowSelection', titleFormatter: 'rowSelection', headerSort: false },
+                    {
+                        title: 'cant edit',
+                        field: 'col1',
+                        width: 200,
+                    },
+                    {
+                        title: 'can edit',
+                        field: 'col2',
+                        width: 200,
+                        editor: 'input',
+                    },
+                    {
+                        title: 'double click',
+                        field: 'col3',
+                        width: 200,
+                    },
+                ],
+                data: data,
+            });
+
+            $(document).ready(function () {
+                table.on('cellClick', function (e, cell) {
+                    if (cell.getColumn().getDefinition().title != 'CHK') {
+                        cell.getRow().toggleSelect();
+                    }
+                });
+
+                table.on('cellEdited', function (cell) {
+                    if (cell.isEdited()) {
+                        cell.getRow().select();
+                    }
+                });
+
+                //
+                table.on('headerClick', function (e, column) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (e.target.className.toLowerCase() != 'tabulator-arrow') {
+                        console.log(e.target.className.toLowerCase());
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                    console.log('headerClick');
+                });
+
+                table.on('dataSorting', function (sorters) {
+                    //sorters - an array of the sorters currently applied
+                    console.log(sorters);
+                    // e.stopPropagation();
+                    // e.preventDefault();
+                    // e.stopImmediatePropagation();
+                });
+
+            });
+        </script>
+    </body>
+</html>

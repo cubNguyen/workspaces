@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" rel="stylesheet" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            var data = [
+                { id: 1, name: 'Oli Bob', location: 'United Kingdom', gender: 'male', rating: 1, col: 'red' },
+                { id: 2, name: 'Mary May', location: 'Germany', gender: 'female', rating: 2, col: 'blue' },
+                { id: 3, name: 'Christine Lobowski', location: 'France', gender: 'female', rating: 0, col: 'green' },
+                { id: 4, name: 'Brendon Philips', location: 'USA', gender: 'male', rating: 1, col: 'orange' },
+                { id: 5, name: 'Margret Marmajuke', location: 'Canada', gender: 'female', rating: 5, col: 'yellow' },
+                { id: 6, name: 'Frank Harbours', location: 'Russia', gender: 'male', rating: 4, col: 'red' },
+                { id: 7, name: 'Jamie Newhart', location: 'India', gender: 'male', rating: 3, col: 'green' },
+                { id: 8, name: 'Gemma Jane', location: 'China', gender: 'female', rating: 0, col: 'red' },
+                { id: 9, name: 'Emily Sykes', location: 'South Korea', gender: 'female', rating: 1, col: 'maroon' },
+                { id: 10, name: 'James Newman', location: 'Japan', gender: 'male', rating: 5, col: 'red' },
+            ];
+
+            var cellFormatter = function (cell, formatterParams, onRendered) {
+                // default color
+                cell.getElement().style.backgroundColor = '#fff2cc';
+
+                // check and set disable color
+                let checkCol = '';
+                if (cell.getField() == 'location') {
+                    checkCol = 'gender';
+                }
+                
+                let checkColVal = cell.getRow().getCell(checkCol).getValue();
+                if (checkColVal == 'male') {
+                    cell.getElement().style.backgroundColor = '#bbb';
+                    cell.getRow().getCell(checkCol).getElement().style.backgroundColor = "#bbb";
+                }
+
+                return cell.getValue();
+            };
+
+            var table = new Tabulator('#example-table', {
+                // layoutColumnsOnNewData: true,
+                headerSortClickElement: 'icon',
+                autoColumns: true,
+                data: data,
+            });
+
+            $(document).ready(function () {
+                table.updateColumnDefinition('location', { formatter: cellFormatter });
+            });
+        </script>
+    </body>
+</html>

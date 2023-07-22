@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" rel="stylesheet" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.slim.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            // var filterData = [{ data: 'aSC 01' }, { data: 'aSC 02' }, { data: 'aSC 03' }, { data: 'aSC 04' }, { data: 'aSC 05' }];
+            var div = document.createElement('div');
+            div.id = 'filterTable';
+
+            var filterTable = new Tabulator(div, {
+                columns: [
+                    { formatter: 'rowSelection', titleFormatter: 'rowSelection', align: 'center', headerSort: false },
+                    { title: 'All', field: 'data', width: 200, headerFilter: 'input', headerSort: false },
+                ],
+                selectable: true,
+            });
+
+            //
+            var data = [
+                { id: 1, name: 'Oli Bob', location: 'United Kingdom', gender: 'male', rating: 1, col: 'red' },
+                { id: 2, name: 'Mary May', location: 'Germany', gender: 'female', rating: 2, col: 'blue' },
+                { id: 3, name: 'Christine Lobowski', location: 'France', gender: 'female', rating: 0, col: 'green' },
+                { id: 4, name: 'Brendon Philips', location: 'USA', gender: 'male', rating: 1, col: 'orange' },
+                { id: 5, name: 'Margret Marmajuke', location: 'Canada', gender: 'female', rating: 5, col: 'yellow' },
+                { id: 6, name: 'Frank Harbours', location: 'Russia', gender: 'male', rating: 4, col: 'red' },
+                { id: 7, name: 'Jamie Newhart', location: 'India', gender: 'male', rating: 3, col: 'green' },
+                { id: 8, name: 'Gemma Jane', location: 'China', gender: 'female', rating: 0, col: 'red' },
+                { id: 9, name: 'Emily Sykes', location: 'South Korea', gender: 'female', rating: 1, col: 'maroon' },
+                { id: 10, name: 'James Newman', location: 'Japan', gender: 'male', rating: 5, col: 'red' },
+            ];
+
+            //create header popup contents
+            var headerPopupFormatter = function (e, column, onRendered) {
+                //e - the mouse/touch event that triggered the popup
+                //component - column/row/cell component that triggered this popup
+                //onRendered - function to call when the formatter has been rendered
+
+                var div = document.createElement('div');
+                div.id = 'filterTable';
+
+                var filterTable = new Tabulator(div, {
+                    columns: [
+                        { formatter: 'rowSelection', titleFormatter: 'rowSelection', align: 'center', headerSort: false },
+                        { title: 'All', field: 'data', width: 200, headerFilter: 'input', headerSort: false },
+                    ],
+                    selectable: true,
+                });
+
+                return div;
+            };
+
+            // https://tabulator.info/examples/5.5#filter-header
+            function customHeaderFilter(cell, onRendered, success, cancel, editorParams) {
+                let tagDiv = document.createElement('div');
+                // <input type="search" placeholder="" style="padding: 4px; width: 100%; box-sizing: border-box;">
+                let tagInput = document.createElement('input');
+                tagInput.type = 'search';
+                tagInput.style = 'padding: 4px; width: 100%; box-sizing: border-box;';
+                tagInput.addEventListener('click', (e) => {
+                    // e.stopPropagation();
+                    // alert(e);
+                    alert('customHeaderFilter');
+
+                    let parents = $(this).parents('div.tabulator-col.tabulator-sortable');
+                    let colField = $(e.currentTarget).parents('div.tabulator-col.tabulator-sortable').attr('tabulator-field');
+
+                    // table.getColumn(colField).popup();
+                });
+                tagDiv.appendChild(tagInput);
+                return tagDiv;
+
+                // onRendered(function(){
+                //     alert('customHeaderFilter onRendered');
+
+                //     // // identify related Vendor Name
+                //     // let checkCol = '';
+                //     // if(cell.getField() == 'etc_vd1') {
+                //     //     checkCol = 'osc_vd1_name';
+                //     // }
+                //     // if(cell.getField() == 'etc_vd2') {
+                //     //     checkCol = 'osc_vd2_name';
+                //     // }
+                //     // if(cell.getField() == 'etc_emb') {
+                //     //     checkCol = 'osc_emb_name';
+                //     // }
+
+                //     // // get value of related Vendor Name
+                //     // let checkColVal = cell.getRow().getCell(checkCol).getValue();
+                //     // if(typeof checkColVal == "string") {
+                //     //     if(!checkColVal.trim()) {
+                //     //         cell.getElement().classList.add('disable');
+                //     //         cell.getRow().getCell(checkCol).getElement().classList.add('disable');
+                //     //     }
+                //     // }
+                //     // if(checkColVal == null) {
+                //     //     cell.getElement().classList.add('disable');
+                //     //     cell.getRow().getCell(checkCol).getElement().classList.add('disable');
+                //     // }
+
+                //     // // compare with osc_vd column
+                //     // if(checkColVal != cell.getRow().getCell('osc_vd').getValue()) {
+                //     //     cell.getElement().classList.add('disable');
+                //     //     cell.getRow().getCell(checkCol).getElement().classList.add('disable');
+                //     // }
+                // });
+
+                // return 'input';
+            }
+
+            $(document).ready(function () {
+                var table = new Tabulator('#example-table', {
+                    //
+                    headerSortClickElement: 'icon',
+                    columns: [
+                        { title: 'CHK', formatter: 'rowSelection', titleFormatter: 'rowSelection', align: 'center', headerSort: false },
+                        { title: 'filter: input', field: 'name', width: 150, headerFilter: 'input' },
+                        { title: 'filter: number', field: 'rating', editor: 'star', hozAlign: 'center', width: 100, headerFilter: 'number', headerFilterPlaceholder: 'at least...', headerFilterFunc: '>=' },
+                        //{title:"Progress", field:"progress", width:150, formatter:"progress", sorter:"number", headerFilter:minMaxFilterEditor, headerFilterFunc:minMaxFilterFunction, headerFilterLiveFilter:false},
+                        {
+                            title: 'headerClickPopup & filter: list',
+                            field: 'gender',
+                            // editor: 'list',
+                            editorParams: { values: { male: 'Male', female: 'Female', clearable: true } },
+                            headerFilter: 'list',
+                            headerFilterParams: { values: { '': 'All', male: 'Male', female: 'Female' }, clearable: true },
+                            headerClickPopup: headerPopupFormatter,
+                            // headerPopup: headerPopupFormatter,
+                            // clickPopup: headerPopupFormatter,
+                            // clickPopup: 'Hey, Im a Popup!',
+                        },
+                        {
+                            title: 'headerClickPopup & filter: input',
+                            field: 'gender',
+                            // editor: 'list',
+                            editorParams: { values: { male: 'Male', female: 'Female', clearable: true } },
+                            headerFilter: 'input',
+                            headerFilterParams: { values: { '': 'All', male: 'Male', female: 'Female' }, clearable: true },
+                            headerClickPopup: headerPopupFormatter,
+                            // headerPopup: headerPopupFormatter,
+                            // clickPopup: headerPopupFormatter,
+                        },
+                        {
+                            title: 'headerPopup & filter: list multiselect',
+                            field: 'col',
+                            editor: 'input',
+                            headerFilter: customHeaderFilter,
+                            // headerFilter: 'input',
+                            headerFilterParams: { valuesLookup: true, clearable: true, multiselect: true },
+                            headerFilterFunc: 'in',
+                            // headerPopup: headerPopupFormatter,
+                            // clickPopup: headerPopupFormatter,
+                        },
+                        {
+                            title: 'filter: list custom',
+                            field: 'col',
+                            // editor: 'input',
+                            headerFilter: 'input',
+                            headerFilterParams: {
+                                valuesLookup: true,
+                                clearable: true,
+                                multiselect: true,
+                                // freetext:true,
+                                // autocomplete:true,
+                                // itemFormatter: custItemFormatter,
+                            },
+                            headerFilterFunc: 'in',
+                            // headerClick: function (e, column) {
+                            //     var allNotSelected = userGrid.getSelectedRows().length !== userGrid.getDataCount();
+                            //     if (allNotSelected) {
+                            //         userGrid.selectRow();
+                            //     } else {
+                            //         userGrid.deselectRow();
+                            //     }
+
+                            //     userGrid.getRows().forEach((row) => row.update({ IsSelected: allNotSelected }));
+                            // },
+                        },
+                        { title: 'Date Of Birth', field: 'dob', hozAlign: 'center', sorter: 'date', headerFilter: 'input' },
+                        {
+                            title: 'Driver',
+                            field: 'car',
+                            hozAlign: 'center',
+                            formatter: 'tickCross',
+                            headerFilter: 'tickCross',
+                            headerFilterParams: { tristate: true },
+                            headerFilterEmptyCheck: function (value) {
+                                return value === null;
+                            },
+                            clickPopup: headerPopupFormatter,
+                        },
+                    ],
+                    data: data,
+                    selectable: true,
+                    // //
+                    debugEventsExternal: true, //console log external events
+                    // debugEventsInternal: true, //console log internal events
+                });
+
+                table.on('popupOpened', function (component) {
+                    //component - the component the popup has been opened on (could be cell, row or column depending on popup)
+
+                    // Get unique data in current column
+                    let myArray = new Array();
+                    component.getCells().forEach((cell) => {
+                        myArray.push(cell.getValue());
+                    });
+                    let unique = myArray.filter((value, index, array) => array.indexOf(value) === index);
+
+                    // Convert and set data for filterTable
+                    let data = new Array();
+                    unique.forEach((val) => {
+                        data.push({ id: val, data: val });
+                    });
+                    filterTable.setData(data);
+
+                    // Get current filter value and set to filterTable
+                    var curVal = component.getHeaderFilterValue();
+                    if (curVal !== undefined) {
+                        filterTable.selectRow(curVal.split(','));
+                    }
+                });
+
+                table.on('popupClosed', function (component) {
+                    //component - the component the popup has been closed for (could be cell, row or column depending on popup)
+
+                    let filterVal = filterTable.getSelectedData().map(function (item) {
+                        return item['data'];
+                    });
+                    table.setHeaderFilterValue(component.getField(), filterVal.join());
+                    filterTable.clearData();
+                });
+
+                table.on('tableBuilt', function () {
+                    $('#example-table .tabulator-header-filter input').on('click', function () {
+                        alert('#example-table .tabulator-header-filter input');
+                        //
+                        let parents = $(this).parents('div.tabulator-col.tabulator-sortable');
+                        let colField = $(this).parents('div.tabulator-col.tabulator-sortable').attr('tabulator-field');
+
+                        table.getColumn(colField).popup();
+                    });
+                });
+
+                // table.on('cellClick', function (e, cell) {
+                //     //e - the click event object
+                //     //cell - cell component
+
+                //     alert('cellClick');
+                // });
+
+                // table.on('headerClick', function (e, column) {
+                //     //e - the click event object
+                //     //column - column component
+
+                //     alert('headerClick');
+                // });
+
+                // TO-DO
+                // $('.tabulator-popup-container .tabulator-edit-list-item').on('click', function () {
+                //     alert('Handler for `click` called.');
+                // });
+                // $('div#example-table.tabulator .tabulator-col-content .tabulator-header-filter input').on('click', function () {
+                //     alert('Handler for `click` called.');
+                // });
+
+                // $('#example-table .tabulator-header-filter input').on('click', function () {
+                //     alert('Handler for `click` called.');
+                // });
+            });
+        </script>
+    </body>
+</html>

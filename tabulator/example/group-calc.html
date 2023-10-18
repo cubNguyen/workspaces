@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+        <!-- <script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> -->
+
+        <!--  -->
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+        <!-- <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/jquery_wrapper.js"></script> -->
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script> -->
+
+        <style>
+            .tabulator-group-level-0 {
+                display: none;
+            }
+
+            .tabulator-tableholder .tabulator-table {
+                height: 100%;
+            }
+
+            .tabulator-tableholder .tabulator-row.tabulator-calcs-bottom {
+                position: absolute;
+                bottom: 0;
+                z-index: 1000;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="example-table"></div>
+
+        <script>
+            var dataSample = [
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 10, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 10, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 10, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 10, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 10, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 10, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 1, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 2, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 3, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 4, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 5, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+                { id: 6, name: 'Billy Bob', age: '12', gender: 'male', height: 1, col: 'red', dob: '', cheese: 1 },
+                { id: 7, name: 'Mary May', age: '1', gender: 'female', height: 2, col: 'blue', dob: '14/05/1982', cheese: true },
+                { id: 8, name: 'Christine Lobowski', age: '42', height: 0, col: 'green', dob: '22/05/1982', cheese: 'true' },
+                { id: 9, name: 'Brendon Philips', age: '125', gender: 'male', height: 1, col: 'orange', dob: '01/08/1980' },
+                { id: 10, name: 'Margret Marmajuke', age: '16', gender: 'female', height: 5, col: 'yellow', dob: '31/01/1999' },
+            ];
+
+            //
+            var table = new Tabulator('#example-table', {
+                data: dataSample,
+                layout:"fitDataTable",
+                height: 363,
+                renderVerticalBuffer: 1000,
+                pagination: 'local',
+                paginationSize: 10+2,
+                groupClosedShowCalcs: true,
+                columnCalcs:"both",
+                groupBy: 'id',
+                columns: [
+                    { title: 'Name', field: 'name' },
+                    { title: 'Age', field: 'age', bottomCalc: "avg" },
+                    { title: 'Gender', field: 'gender'},
+                    { title: 'Height', field: 'height', bottomCalc: "avg" },
+                    { title: 'Favourite Color', field: 'col' },
+                    { title: 'Date Of Birth', field: 'dob' },
+                    { title: 'Cheese Preference', field: 'cheese' },
+                ],
+            });
+        </script>
+    </body>
+</html>

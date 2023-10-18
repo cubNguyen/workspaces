@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" />
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" /> -->
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+        <!-- <script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> -->
+        <!--  -->
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+        <!-- <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/jquery_wrapper.js"></script> -->
+    </head>
+    <body>
+        <div id="example-table"></div>
+
+        <script>
+            //
+            var tabledata = [
+                { id: 1, name: 'Oli Bob', location: 'United Kingdom', gender: 'male', rating: 1, col: 'red', dob: '14/04/1984', progress: 12 },
+                { id: 2, name: 'Mary May', location: 'Germany', gender: 'female', rating: 2, col: 'blue', dob: '14/05/1982', progress: 10 },
+                { id: 3, name: 'Christine Lobowski', location: 'France', gender: 'female', rating: 0, col: 'green', dob: '22/05/1982', progress: 1 },
+                { id: 4, name: 'Brendon Philips', location: 'USA', gender: 'male', rating: 1, col: 'orange', dob: '01/08/1980', progress: 5 },
+                { id: 5, name: 'Margret Marmajuke', location: 'Canada', gender: 'female', rating: 5, col: 'yellow', dob: '31/01/1999', progress: 100 },
+                { id: 6, name: 'Frank Harbours', location: 'Russia', gender: 'male', rating: 4, col: 'red', dob: '12/05/1966', progress: 20 },
+                { id: 7, name: 'Jamie Newhart', location: 'India', gender: 'male', rating: 3, col: 'green', dob: '14/05/1985', progress: 60 },
+                // { id: 8, name: 'Gemma Jane', location: 'China', gender: 'female', rating: 0, col: [
+                //     'red',
+                //     'blue',
+                //     'green',
+                //     'orange',
+                //     'yellow',
+                // ]
+                // , dob: '22/05/1982', progress: 40 },
+                // { id: 9, name: 'Emily Sykes', location: 'South Korea', gender: 'female', rating: 1, col: [{
+                //     0: 'red',
+                //     1: 'blue',
+                //     2: 'green',
+                //     3: 'orange',
+                //     4: 'yellow',
+                // }]
+                // , dob: '11/11/1970', progress: 30 },
+            ];
+
+            // create header popup contents
+            var headerPopupFormatter = function (e, column, onRendered) {
+                //e - the mouse/touch event that triggered the popup
+                //component - column/row/cell component that triggered this popup
+                //onRendered - function to call when the formatter has been rendered
+
+                onRendered(function () {
+                    this.element.style.top = column.getElement().getBoundingClientRect().bottom + 'px';
+                    this.element.style.left = column.getElement().getBoundingClientRect().left + 'px';
+                });
+
+                let container = document.createElement('span');
+
+                //create and style inputs
+                let start = document.createElement('input');
+                start.setAttribute('type', 'number');
+                start.setAttribute('placeholder', 'Min');
+                start.setAttribute('min', 0);
+                start.setAttribute('max', 100);
+                start.style.padding = '4px';
+                start.style.width = '50%';
+                start.style.boxSizing = 'border-box';
+
+                let end = start.cloneNode();
+                end.setAttribute('placeholder', 'Max');
+
+                //
+                start.value = column.getHeaderFilterValue() == undefined ? '' : column.getHeaderFilterValue().start;
+                end.value = column.getHeaderFilterValue() == undefined ? '' : column.getHeaderFilterValue().end;
+
+                //
+                function buildValues() {
+                    // success({
+                    //     start: start.value,
+                    //     end: end.value,
+                    // });
+                    column.getTable().setHeaderFilterValue(column.getField(), {
+                        start: start.value,
+                        end: end.value,
+                    });
+                    column.getTable().element.querySelector('div.tabulator-col.tabulator-sortable[tabulator-field="' + column.getField() + '"] .tabulator-header-filter input').value =
+                        start.value + ' ~ ' + end.value;
+                }
+
+                function keypress(e) {
+                    if (e.keyCode == 13) {
+                        buildValues();
+                    }
+
+                    // if (e.keyCode == 27) {
+                    //     cancel();
+                    // }
+                }
+
+                start.addEventListener('change', buildValues);
+                start.addEventListener('blur', buildValues);
+                start.addEventListener('keydown', keypress);
+
+                end.addEventListener('change', buildValues);
+                end.addEventListener('blur', buildValues);
+                end.addEventListener('keydown', keypress);
+
+                //
+                container.appendChild(start);
+                container.appendChild(end);
+
+                return container;
+            };
+
+            // https://tabulator.info/examples/5.5#filter-header
+            function customHeaderFilter(cell, onRendered, success, cancel, editorParams) {
+                let container = document.createElement('span');
+                // <input type="search" placeholder="" style="padding: 4px; width: 100%; box-sizing: border-box;">
+                let tagInput = document.createElement('input');
+                tagInput.type = 'search';
+                tagInput.style = 'padding: 4px; width: 100%; box-sizing: border-box;';
+                tagInput.addEventListener('click', (e) => {
+                    table.element.querySelector('div.tabulator-col.tabulator-sortable[tabulator-field="' + cell.getField() + '"]').click();
+                });
+                tagInput.addEventListener('change', (e) => {
+                    if (e.target.value == '') {
+                        cell.getTable().setHeaderFilterValue(cell.getField(), '');
+                    }
+                });
+                container.appendChild(tagInput);
+                return container;
+            }
+
+            // https://tabulator.info/examples/5.5#filter-header
+            // custom max min filter function
+            function minMaxFilterFunction(headerValue, rowValue, rowData, filterParams) {
+                //headerValue - the value of the header filter element
+                //rowValue - the value of the column in this row
+                //rowData - the data for the row being filtered
+                //filterParams - params object passed to the headerFilterFuncParams property
+
+                if (rowValue) {
+                    if (headerValue.start != '') {
+                        if (headerValue.end != '') {
+                            return rowValue >= headerValue.start && rowValue <= headerValue.end;
+                        } else {
+                            return rowValue >= headerValue.start;
+                        }
+                    } else {
+                        if (headerValue.end != '') {
+                            return rowValue <= headerValue.end;
+                        }
+                    }
+                }
+
+                return true; //must return a boolean, true if it passes the filter.
+            }
+
+            var table = new Tabulator('#example-table', {
+                height: '311px',
+                layout: 'fitColumns',
+                headerSortClickElement: 'icon',
+                data: tabledata,
+                columns: [
+                    { title: 'Name', field: 'name', width: 150, headerFilter: 'input' },
+                    {
+                        title: 'Progress',
+                        field: 'progress',
+                        width: 150,
+                        formatter: 'progress',
+                        sorter: 'number',
+                        headerFilter: customHeaderFilter,
+                        // headerFilter: 'input',
+                        headerFilterFunc: minMaxFilterFunction,
+                        headerFilterLiveFilter: false,
+                        headerClickPopup: headerPopupFormatter,
+                    },
+                    {
+                        title: 'Gender',
+                        field: 'gender',
+                        editor: 'list',
+                        editorParams: { values: { male: 'Male', female: 'Female', clearable: true } },
+                        headerFilter: true,
+                        headerFilterParams: { values: { male: 'Male', female: 'Female', '': '' }, clearable: true },
+                    },
+                    { title: 'Rating', field: 'rating', editor: 'star', hozAlign: 'center', width: 100, headerFilter: 'number', headerFilterPlaceholder: 'at least...', headerFilterFunc: '>=' },
+                    { title: 'Favourite Color', field: 'col', editor: 'textarea', headerFilter: 'list', headerFilterParams: { valuesLookup: true, clearable: true } },
+                    { title: 'Date Of Birth', field: 'dob', hozAlign: 'center', sorter: 'date', headerFilter: 'input' },
+                    {
+                        title: 'Driver',
+                        field: 'car',
+                        hozAlign: 'center',
+                        formatter: 'tickCross',
+                        headerFilter: 'tickCross',
+                        headerFilterParams: { tristate: true },
+                        headerFilterEmptyCheck: function (value) {
+                            return value === null;
+                        },
+                    },
+                ],
+            });
+
+            table.on('headerClick', function (e, column) {
+                //e - the click event object
+                //column - column component
+                alert('headerClick');
+            });
+
+            table.on('dataFiltering', function (filters) {
+                //filters - array of filters currently applied
+                alert('dataFiltering');
+            });
+        </script>
+    </body>
+</html>

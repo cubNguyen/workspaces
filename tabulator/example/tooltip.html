@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.css" />
+        <!--  -->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+        <!-- <script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> -->
+
+        <!--  -->
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.js"></script>
+        <!-- <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/jquery_wrapper.js"></script> -->
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script> -->
+
+        <!--  -->
+        <style>
+            /* .tabulator-tooltip {
+                position: relative;
+                top: 0% !important;
+                left: 0% !important;
+            } */
+        </style>
+    </head>
+    <body>
+        <br /><br /><br /><br />
+        <div id="example-table"></div>
+
+        <script>
+            //
+            var data = [{ name: 'luke', email: 'stuff@lukeorriss.com', address: 'The Moon' }];
+
+            function formatTooltip(e, cell, onRendered) {
+                let data = cell.getData();
+
+                return `You are ${data.name}, your email is ${data.email} and addresss is ${data.address}`;
+            }
+
+            function formatHeaderTooltip(e, cell, onRendered) {
+
+                onRendered(function(){
+                    this.element.style.backgroundColor = 'red';
+                    this.element.style.top = cell.getElement().getBoundingClientRect().top - cell.getElement().getBoundingClientRect().height + 'px';
+                    this.element.style.left = cell.getElement().getBoundingClientRect().left + 'px';
+                });
+
+                let el = document.createElement('div');
+                el.innerText = cell.getDefinition().title;
+                return el;
+            }
+
+            $(document).ready(function () {
+                var table = new Tabulator('#example-table', {
+                    //
+                    headerSortClickElement: 'icon',
+                    data: data,
+                    height: '500px',
+                    // selectable: true,
+                    columns: [
+                        {
+                            title: 'Full Name',
+                            field: 'name',
+                            tooltip: formatTooltip,
+                            headerTooltip: formatHeaderTooltip,
+                        },
+                        { title: 'Email', field: 'email', headerTooltip: formatHeaderTooltip, },
+                        { title: 'Address', field: 'address', headerTooltip: formatHeaderTooltip, },
+                    ],
+                });
+            });
+        </script>
+    </body>
+</html>
